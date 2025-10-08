@@ -1,10 +1,10 @@
 import { getDb, isMockMode, getMockApi } from './supabaseClient';
 
 /**
- * Shape note:
- * Supabase view public.menu exposes:
- *  - id, name, description, price, category, imageUrl (camelCase), isFeatured
- * Mock data will mirror that shape to avoid UI conditionals.
+ * Data normalization
+ * - We normalize both Supabase rows and mock items to a unified camelCase shape the UI expects.
+ * - image_url (snake_case) from DB/view is mapped to imageUrl (camelCase).
+ * - We also ensure category and isFeatured fields are present.
  */
 
 // PUBLIC_INTERFACE
@@ -14,21 +14,47 @@ export const menuService = {
     if (isMockMode()) {
       const api = getMockApi();
       const items = await api.getMenu();
-      // Ensure fields exist even if undefined in mock entries
-      return items.map((it) => ({
+      // Normalize mock to common shape
+      return (items || []).map((it) => ({
         id: it.id,
         name: it.name,
         description: it.description,
         price: it.price,
-        category: it.category || '',
+        category: (it.category || '').trim(),
         imageUrl: it.imageUrl || it.image_url || null,
-        isFeatured: typeof it.isFeatured === 'boolean' ? it.isFeatured : !!it.is_featured,
+        isFeatured:
+          typeof it.isFeatured === 'boolean'
+            ? it.isFeatured
+            : typeof it.is_featured === 'boolean'
+            ? it.is_featured
+            : false,
+        created_at: it.created_at,
       }));
     }
+
     const db = getDb();
-    const { data, error } = await db.from('menu').select('*').order('id');
+    // Explicitly select fields including image_url to guard against view/table changes
+    const { data, error } = await db
+      .from('menu')
+      .select('id,name,description,price,category,image_url,imageUrl,is_featured,isFeatured,created_at')
+      .order('id');
     if (error) throw error;
-    // Data already matches { imageUrl, category } from the view
-    return data;
+
+    // Map either view alias (imageUrl) or base column (image_url) to imageUrl
+    return (data || []).map((row) => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      category: (row.category || '').trim(),
+      imageUrl: row.imageUrl ?? row.image_url ?? null,
+      isFeatured:
+        typeof row.isFeatured === 'boolean'
+          ? row.isFeatured
+          : typeof row.is_featured === 'boolean'
+          ? row.is_featured
+          : false,
+      created_at: row.created_at,
+    }));
   },
 };

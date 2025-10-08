@@ -9,6 +9,7 @@ import Orders from './pages/Orders';
 import NotFound from './pages/NotFound';
 import StatusBadge from './components/StatusBadge';
 import { useCart } from './store/cartContext';
+import { isMockMode } from './services/supabaseClient';
 
 function Navbar() {
   const { items } = useCart();
@@ -54,7 +55,14 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
           <div style={{marginTop: 24, display: 'flex', justifyContent: 'center'}}>
-            <StatusBadge type="info" text="Mock mode engages automatically if Supabase env is not set." />
+            <StatusBadge
+              type={isMockMode() ? 'error' : 'success'}
+              text={
+                isMockMode()
+                  ? 'Data mode: Mock (set REACT_APP_SUPABASE_URL/KEY and restart to use Supabase)'
+                  : 'Data mode: Supabase (live database in use)'
+              }
+            />
           </div>
         </main>
       </CartProvider>

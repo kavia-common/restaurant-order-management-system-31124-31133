@@ -1,82 +1,75 @@
-# Lightweight React Template for KAVIA
+# Restaurant Frontend (Corporate Navy Classic)
 
-This project provides a minimal React template with a clean, modern UI and minimal dependencies.
+Customer-facing React application for browsing menus, managing cart, checking out, and viewing orders.
 
-## Features
+## Highlights
 
-- **Lightweight**: No heavy UI frameworks - uses only vanilla CSS and React
-- **Modern UI**: Clean, responsive design with KAVIA brand styling
-- **Fast**: Minimal dependencies for quick loading times
-- **Simple**: Easy to understand and modify
+- Corporate Navy Classic theme (Navy blue with gold accents)
+- Client-side routing: `/`, `/menu`, `/cart`, `/checkout`, `/orders`
+- Cart persisted to localStorage and hydrated on load
+- Supabase integration with automatic mock fallback when env vars are missing
+- API abstraction services (menu, orders) for Supabase/mock
+- Accessible and responsive UI
 
-## Getting Started
+## Environment Variables
 
-In the project directory, you can run:
+Create a `.env` file in the project root with:
 
-### `npm start`
-
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-### `npm test`
-
-Launches the test runner in interactive watch mode.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-## Customization
-
-### Colors
-
-The main brand colors are defined as CSS variables in `src/App.css`:
-
-```css
-:root {
-  --kavia-orange: #E87A41;
-  --kavia-dark: #1A1A1A;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-}
+```
+REACT_APP_SUPABASE_URL=<your-supabase-url>
+REACT_APP_SUPABASE_KEY=<your-supabase-anon-key>
 ```
 
-### Components
+If these are not provided, the app will automatically run in mock mode and log a console warning:
+```
+[Supabase] REACT_APP_SUPABASE_URL/KEY not set. Running in mock mode.
+```
 
-This template uses pure HTML/CSS components instead of a UI framework. You can find component styles in `src/App.css`. 
+## Scripts
 
-Common components include:
-- Buttons (`.btn`, `.btn-large`)
-- Container (`.container`)
-- Navigation (`.navbar`)
-- Typography (`.title`, `.subtitle`, `.description`)
+- npm start - start dev server
+- npm test - run tests
+- npm run build - production build
 
-## Learn More
+## Architecture Overview
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- src/services/supabaseClient.js
+  - Initializes Supabase client from env, or falls back to mock mode
+- src/services/menuService.js
+  - getMenu(): pulls from Supabase table `menu` or mock
+- src/services/orderService.js
+  - createOrder(), listOrders(): uses Supabase `orders` table or mock
+- src/services/paymentService.js
+  - Simulates a lightweight payment flow
+- src/store/cartContext.js
+  - React Context with localStorage persistence (key: cart:v1)
+- src/pages/*
+  - Home, Menu, Cart, Checkout, Orders, NotFound
+- src/components/*
+  - Navbar, MenuCard, QuantityStepper, StatusBadge, Loader, ErrorState
 
-### Code Splitting
+## Supabase Tables (if using Supabase)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- menu: id (int), name (text), description (text), price (float)
+- orders: id (int/uuid), created_at (timestamp), items (json), total (float), status (text), customer_name (text), customer_email (text), address (text)
 
-### Analyzing the Bundle Size
+## Accessibility
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- Focus-visible styles for interactive elements
+- aria-labels for controls
+- role and aria-live used for status messages and nav
 
-### Making a Progressive Web App
+## Styling
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- CSS variables defined in src/index.css (Corporate Navy palette)
+- Utility classes for surfaces, buttons, grids
 
-### Advanced Configuration
+## Mock Data
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- Defined in src/mock/mockData.js
+- Mock API in src/mock/mockApi.js simulates latency and stores orders in-memory
 
-### Deployment
+## Notes
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- The preview system will handle running the app. No script changes required.
+- Mock mode is meant for development and demos. For production, configure Supabase env vars.

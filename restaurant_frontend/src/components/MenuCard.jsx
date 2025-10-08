@@ -1,20 +1,38 @@
 import QuantityStepper from './QuantityStepper';
 
+const FALLBACK_IMG =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="120"><rect width="100%" height="100%" rx="10" ry="10" fill="%23e5e7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%236b7280" font-size="14" font-family="Arial, Helvetica, sans-serif">No image</text></svg>';
+
 // PUBLIC_INTERFACE
 export default function MenuCard({ item, onAdd }) {
   /** Card for menu item with add-to-cart and optional quantity control. */
-  return (
-    <div className="surface" style={{ padding: 16, display: 'flex', gap: 12 }}>
-      {/* Optional image if provided */}
-      {item.imageUrl && (
-        <img
-          src={item.imageUrl}
-          alt={item.name}
-          style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(17,24,39,0.08)' }}
-        />
-      )}
+  const imgSrc = item.imageUrl || null;
 
-      <div style={{ flex: 1 }}>
+  const onImgError = (e) => {
+    if (e?.target) {
+      // Swap to inline placeholder on error and prevent loop
+      e.target.onerror = null;
+      e.target.src = FALLBACK_IMG;
+    }
+  };
+
+  return (
+    <div className="surface menu-card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="menu-card-media-wrap">
+        <img
+          className="menu-card-image"
+          src={imgSrc || FALLBACK_IMG}
+          onError={onImgError}
+          alt={item.name}
+        />
+        {item.category ? (
+          <span className="menu-card-category" aria-label={`Category ${item.category}`}>
+            {item.category}
+          </span>
+        ) : null}
+      </div>
+
+      <div style={{ padding: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: 8 }}>
           <div>
             <h3 style={{ margin: '0 0 6px 0' }}>{item.name}</h3>

@@ -111,3 +111,11 @@ label {
   font-weight: 600;
   color: var(--text);
 }
+
+/* Base chip class used in category filters */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}

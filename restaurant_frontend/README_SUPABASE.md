@@ -18,6 +18,7 @@ RLS (demo):
 Tighten for production.
 
 Notes:
-- The frontend normalizes menu rows so either image_url (snake_case) or imageUrl (from the view alias) will populate item.imageUrl and render correctly.
-- If you customize the view, ensure image_url is included or aliased as imageUrl. Example select used by the app:
-  select('id,name,description,price,category,image_url,imageUrl,is_featured,isFeatured,created_at')
+- The frontend normalizes menu rows and expects snake_case columns from Supabase.
+- The service maps image_url -> imageUrl and is_featured -> isFeatured in JavaScript.
+- Example select used by the app:
+  select('id,name,description,price,category,image_url,is_featured,created_at')

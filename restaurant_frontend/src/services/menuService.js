@@ -36,25 +36,22 @@ export const menuService = {
     // Explicitly select fields including image_url to guard against view/table changes
     const { data, error } = await db
       .from('menu')
-      .select('id,name,description,price,category,image_url,imageUrl,is_featured,isFeatured,created_at')
+      // Select snake_case fields from the underlying table/view
+      // and map to camelCase in JS only.
+      .select('id,name,description,price,category,image_url,is_featured,created_at')
       .order('id');
     if (error) throw error;
 
-    // Map either view alias (imageUrl) or base column (image_url) to imageUrl
+    // Map snake_case DB fields to camelCase shape for UI
     return (data || []).map((row) => ({
       id: row.id,
       name: row.name,
       description: row.description,
       price: row.price,
       category: (row.category || '').trim(),
-      imageUrl: row.imageUrl ?? row.image_url ?? null,
-      isFeatured:
-        typeof row.isFeatured === 'boolean'
-          ? row.isFeatured
-          : typeof row.is_featured === 'boolean'
-          ? row.is_featured
-          : false,
-      created_at: row.created_at,
+      imageUrl: row.image_url ?? null,
+      isFeatured: typeof row.is_featured === 'boolean' ? row.is_featured : false,
+      createdAt: row.created_at,
     }));
   },
 };
